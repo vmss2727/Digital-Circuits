@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LogicBench — Digital Logic Studio</title>
+<style>
+:root{
+ --bg:#020a05;--bg2:#04140a;--panel:rgba(6,22,12,.78);--panel2:rgba(2,12,6,.92);
+ --line:rgba(110,231,183,.18);--line2:rgba(74,222,128,.18);--cyan:#6ee7b7;
+ --blue:#4ade80;--green:#22c55e;--amber:#fbbf24;--pink:#f472b6;--red:#fb7185;
+ --text:#ecfdf5;--muted:#a7f3d0;--dim:#6ee7b7;
+ --circuit-wire:#7dd3fc;--circuit-gate-stroke:#e2e8f0;--circuit-gate-fill:#1e293b;--circuit-text:#e2e8f0;
+}
+*{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:#166534 transparent}
+html{scroll-behavior:smooth;color-scheme:dark}
+body{margin:0;min-height:100vh;color:var(--text);font:14px Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+background-color:var(--bg);
+background-image:linear-gradient(rgba(110,231,183,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(110,231,183,.035) 1px,transparent 1px);
+background-size:30px 30px;animation:grid 24s linear infinite;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:-20%;pointer-events:none;z-index:-1;background:
+radial-gradient(circle at 12% 8%,rgba(34,197,94,.14),transparent 25%),
+radial-gradient(circle at 88% 82%,rgba(22,101,52,.15),transparent 28%);
+animation:ambient 12s ease-in-out infinite alternate}
+button,input,select{font:inherit}button{cursor:pointer}
+::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-thumb{background:#166534;border-radius:999px}
+.app{max-width:1280px;margin:auto;padding:24px 18px 50px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:12px 0 24px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:38px;height:38px;border:1px solid rgba(110,231,183,.45);border-radius:11px;display:grid;place-items:center;color:var(--cyan);background:rgba(110,231,183,.07);box-shadow:0 0 30px rgba(110,231,183,.08);font-weight:900}
+.brand h1{margin:0;font-size:18px;letter-spacing:.02em;color:#ffffff}.brand small{color:var(--dim)}
+.live{display:flex;align-items:center;gap:7px;border:1px solid rgba(110,231,183,.3);background:rgba(22,101,52,.3);color:var(--green);padding:7px 11px;border-radius:999px;font-size:11px}.live i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+.hero{padding:42px 0 28px;position:relative}.hero h2{font-size:clamp(36px,6vw,70px);line-height:.98;margin:10px 0 18px;letter-spacing:-.05em;text-shadow:0 0 25px rgba(110,231,183,.18);color:#ffffff}.hero h2 span{color:var(--cyan)}.hero p{max-width:760px;color:var(--muted);line-height:1.8}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.chip{border:1px solid var(--line);background:rgba(110,231,183,.045);padding:7px 10px;border-radius:999px;color:#a7f3d0;font-size:11px}
+.nav{position:sticky;top:10px;z-index:20;border:1px solid var(--line2);background:rgba(2,12,6,.85);backdrop-filter:blur(18px);border-radius:15px;padding:7px;display:flex;gap:5px;overflow:auto;margin-bottom:22px}.nav button{white-space:nowrap;border:0;background:transparent;color:var(--muted);padding:9px 12px;border-radius:10px;font-size:12px}.nav button:hover,.nav button.active{background:rgba(110,231,183,.15);color:#ffffff}
+.panel{border:1px solid var(--line2);background:linear-gradient(145deg,rgba(8,30,16,.85),rgba(2,12,6,.92));border-radius:18px;padding:18px;box-shadow:0 20px 55px rgba(0,0,0,.4);margin-bottom:18px}.section-title{display:flex;align-items:center;gap:10px;margin:0 0 15px;font-size:15px;color:#ffffff}.section-title:before{content:"";width:3px;height:18px;border-radius:4px;background:var(--cyan);box-shadow:0 0 10px rgba(110,231,183,.6)}.sub{color:#a7f3d0;font-size:11px;margin-top:-8px;margin-bottom:16px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.btn{border:1px solid #166534;background:rgba(6,22,12,.8);color:#d1fae5;padding:9px 12px;border-radius:9px;transition:.18s}.btn:hover{border-color:rgba(110,231,183,.6);transform:translateY(-1px);color:#ffffff}.btn.primary{background:rgba(22,101,52,.4);border-color:rgba(110,231,183,.5);color:#ffffff}.btn.green{color:var(--green);border-color:rgba(110,231,183,.35)}.btn.amber{color:var(--amber);border-color:rgba(251,191,36,.35)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.col6{grid-column:span 6}.col4{grid-column:span 4}.col8{grid-column:span 8}.col12{grid-column:span 12}
+label{display:block;color:#a7f3d0;font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:7px}input,select{width:100%;background:rgba(2,10,5,.85);border:1px solid #166534;border-radius:9px;padding:10px 11px;color:#ffffff;outline:none}input:focus,select:focus{border-color:rgba(110,231,183,.7);box-shadow:0 0 0 3px rgba(110,231,183,.1)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:15px}.tab{border:1px solid #166534;background:transparent;color:#a7f3d0;padding:8px 12px;border-radius:999px}.tab.active{border-color:rgba(110,231,183,.6);background:rgba(22,101,52,.4);color:#ffffff}
+.mode{display:none}.mode.active{display:block}.result{display:none}.result.show{display:block}
+.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.answer{border:1px solid var(--line2);border-radius:13px;padding:15px;background:rgba(2,10,5,.5)}.answer span{display:block;color:#a7f3d0;font-size:10px;text-transform:uppercase;letter-spacing:.12em}.answer b{display:block;color:var(--green);font:18px ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:7px;overflow-wrap:anywhere}
+.verify{padding:12px 14px;border:1px solid rgba(110,231,183,.28);background:rgba(22,101,52,.2);color:#d1fae5;border-radius:12px;margin-top:12px}.error{display:none;padding:12px;border-radius:11px;color:#fecdd3;background:rgba(244,63,94,.15);border:1px solid rgba(244,63,94,.4);margin:12px 0}.error.show{display:block}
+.tablewrap{overflow:auto;border:1px solid var(--line2);border-radius:13px;max-height:320px;margin-bottom:4px}table{border-collapse:collapse;width:100%;min-width:520px}th,td{padding:9px 10px;border-bottom:1px solid rgba(22,101,52,.6);text-align:center}th{background:rgba(6,22,12,.9);color:#ffffff;font-size:11px}td{font-family:ui-monospace,monospace;color:#d1fae5}tr:hover td{background:rgba(110,231,183,.05)}
+.kmap{overflow:auto;border:1px solid var(--line2);border-radius:13px;padding:12px}.kmap table{min-width:600px}.kmap td,.kmap th{height:58px}.k1{background:rgba(22,101,52,.4)}.kx{background:rgba(251,191,36,.15)}.km{color:var(--cyan);font-size:10px}
+.diagram{overflow:auto;border:1px solid var(--line2);border-radius:13px;background:rgba(2,10,5,.4)}svg{display:block;min-width:760px;width:100%}
+.truth-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.signal{display:inline-flex;align-items:center;gap:8px;border:1px solid #166534;border-radius:9px;padding:7px 9px;background:rgba(2,10,5,.6)}.signal strong{color:var(--cyan)}
+.feature{border:1px solid var(--line2);border-radius:14px;padding:16px;background:rgba(2,10,5,.3)}.feature h3{font-size:13px;margin:0 0 8px;color:#ffffff}
+.footer{border-top:1px solid #166534;padding-top:22px;margin-top:45px;color:#a7f3d0;font-size:11px}
+@keyframes grid{to{background-position:60px 60px,60px 60px}}@keyframes ambient{to{transform:scale(1.08) translate(1%,1%);opacity:1}}
+@media(max-width:800px){.grid .col6,.grid .col4,.grid .col8{grid-column:span 12}.answer-grid{grid-template-columns:1fr}.hero{padding-top:25px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="app">
+<header class="top"><div class="brand"><div class="logo">Σ</div><div><h1>LogicBench</h1><small>Digital Logic Design Studio</small></div></div><div class="live"><i></i> LIVE SIMULATION</div></header>
+
+<section class="hero">
+<div style="color:#6ee7b7;font-size:11px;letter-spacing:.2em;font-weight:800">BOOLEAN • CIRCUITS • DIGITAL DESIGN</div>
+<h2>Design logic.<br><span>See it work.</span></h2>
+<p>An all-in-one digital logic laboratory featuring exact Quine-McCluskey tabular minimization, K-maps, arithmetic units with XOR optimization, and universal gate networks.</p>
+<div class="chips"><span class="chip">QUINE-MCCLUSKEY ENGINE</span><span class="chip">K-MAP PANEL</span><span class="chip">XOR ADDERS/SUBTRACTERS</span><span class="chip">UNIVERSAL GATES (NAND/NOR)</span><span class="chip">PNG EXPORT</span></div>
+</section>
+
+<nav class="nav" id="nav">
+<button class="active" data-scroll="boolean">Boolean Lab</button>
+<button data-scroll="truthSection">Truth Table</button>
+<button data-scroll="kmapSection">Karnaugh Map</button>
+<button data-scroll="gateSection">Gate Implementation</button>
+<button data-scroll="adderSection">Adders Component</button>
+<button data-scroll="subtracterSection">Subtracters Component</button>
+<button data-scroll="muxSection">Multiplexer</button>
+</nav>
+
+<section class="panel" id="boolean">
+<h2 class="section-title">Boolean Lab</h2><div class="sub">Start from an expression, minterms/maxterms, or a fully interactive truth table.</div>
+<div class="tabs"><button class="tab active" data-mode="expression">Expression</button><button class="tab" data-mode="terms">Minterms / Maxterms</button><button class="tab" data-mode="truth">Truth Table</button></div>
+<div id="mode-expression" class="mode active">
+<label>Boolean expression</label><input id="expr" value="A.B + A'.C">
+<div class="hint">AND: . * &amp; • OR: + | • NOT: ! ~ ' • XOR: ^</div>
+</div>
+<div id="mode-terms" class="mode">
+<div class="grid"><div class="col6"><label>Variables</label><select id="termN"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></div><div class="col6"><label>Mode</label><div class="toolbar"><button class="btn primary" id="sumBtn">Σ Minterms</button><button class="btn" id="prodBtn">Π Maxterms</button></div></div>
+<div class="col6"><label>Terms</label><input id="terms" value="0,1,2,5,6,7"></div><div class="col6"><label>Don't cares</label><input id="dc" placeholder="3,4"></div></div>
+</div>
+<div id="mode-truth" class="mode"><div class="truth-controls"><label style="margin:0">Variables</label><select id="truthN"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select><button class="btn primary" id="resetTruth">Reset table</button></div><div id="editTruth" class="tablewrap"></div></div>
+<div id="error" class="error"></div>
+<div id="booleanResult" class="result" style="margin-top:15px">
+  <div class="answer-grid">
+    <div class="answer"><span>Minimized SOP (Quine-McCluskey)</span><b id="sop">—</b></div>
+    <div class="answer"><span>Minimized POS</span><b id="pos">—</b></div>
+  </div>
+  <div class="verify">✓ <b>Cross-verified</b> against every truth-table row.</div>
+</div>
+</section>
+
+<section class="panel" id="truthSection">
+<h2 class="section-title">Truth Table</h2>
+<div class="sub">Complete truth table generated for the current expression or inputs.</div>
+<div id="kmapTruth" class="tablewrap"></div>
+</section>
+
+<section class="panel" id="kmapSection">
+<h2 class="section-title">Karnaugh Map (K-Map)</h2>
+<div class="sub">Gray-code minimized K-map view for the current logic expression.</div>
+<div id="kmap" class="kmap"></div>
+</section>
+
+<section class="panel" id="gateSection">
+<h2 class="section-title">Gate-Level Implementation</h2>
+<div class="sub">Visualizes your logic using standard ANSI/IEEE gate architecture, including pure NAND-only or NOR-only universal logic networks.</div>
+<div class="toolbar" id="gateTabs">
+<button class="btn primary" data-gateview="basic">Basic gates</button>
+<button class="btn" data-gateview="nand">NAND only (Universal)</button>
+<button class="btn" data-gateview="nor">NOR only (Universal)</button>
+<button class="btn green" id="downloadPngBtn" style="margin-left:auto;">Download PNG</button>
+</div>
+<div id="gateDiagram" class="diagram" style="margin-top:12px"></div>
+</section>
+
+<section class="panel" id="adderSection">
+<h2 class="section-title">Binary Adders Component (Half & Full Adder)</h2>
+<div class="sub">Optimized with XOR gates for Sum generation.</div>
+<div style="display:flex;gap:15px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
+  <div>
+    <label>Adder Type</label>
+    <div class="toolbar" id="adderModeTabs">
+      <button class="btn primary" data-addermode="ha" onclick="setAdderMode('ha')">Half Adder</button>
+      <button class="btn" data-addermode="fa" onclick="setAdderMode('fa')">Full Adder</button>
+    </div>
+  </div>
+</div>
+<div class="feature" style="margin-bottom:10px">
+  <div id="adderControls" class="toolbar"></div>
+  <div id="adderResult" style="margin-top:10px"></div>
+</div>
+<div id="adderSvg" class="diagram"></div>
+</section>
+
+<section class="panel" id="subtracterSection">
+<h2 class="section-title">Binary Subtracters Component (Half & Full Subtracter)</h2>
+<div class="sub">Optimized with XOR gates for Difference generation.</div>
+<div style="display:flex;gap:15px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
+  <div>
+    <label>Subtracter Type</label>
+    <div class="toolbar" id="subtracterModeTabs">
+      <button class="btn primary" data-submode="hs" onclick="setSubtracterMode('hs')">Half Subtracter</button>
+      <button class="btn" data-submode="fs" onclick="setSubtracterMode('fs')">Full Subtracter</button>
+    </div>
+  </div>
+</div>
+<div class="feature" style="margin-bottom:10px">
+  <div id="subtracterControls" class="toolbar"></div>
+  <div id="subtracterResult" style="margin-top:10px"></div>
+</div>
+<div id="subtracterSvg" class="diagram"></div>
+</section>
+
+<section class="panel" id="muxSection">
+<h2 class="section-title">Multiplexer Lab</h2>
+<div class="sub">Configure MUX size, data inputs, and select lines.</div>
+<div class="toolbar" style="margin-bottom:14px">
+  <button class="btn primary muxSize" data-size="2">2:1 MUX</button>
+  <button class="btn muxSize" data-size="4">4:1 MUX</button>
+</div>
+<div id="muxControls"></div>
+<div id="muxDiagram" class="diagram" style="margin-top:14px"></div>
+</section>
+
+<footer class="footer">LogicBench • Professional Digital Logic Studio • Responsive emerald dark theme</footer>
+</div>
+
+<script>
+const V=["A","B","C","D","E","F"];
+const state={
+    mode:"expression", max:false, gate:"basic", truthN:3, rows:[], 
+    adderMode:"ha", adderInputs:{A:0,B:0,Cin:0},
+    subMode:"hs", subInputs:{A:0,B:0,Bin:0},
+    mux:2, muxData:[0,0], muxSel:0
+};
+const BUBBLE_R = 3.5;
+const $=id=>document.getElementById(id), bits=(n,k)=>Array.from({length:k},(_,i)=>(n>>(k-1-i))&1), gray=k=>Array.from({length:1<<k},(_,i)=>i^(i>>1)), parseList=s=>(s||"").split(/[,\s]+/).filter(Boolean).map(Number).filter(Number.isFinite);
+
+function initRows(n){
+    state.truthN=n;
+    state.rows=Array.from({length:1<<n},(_,m)=>({m,b:bits(m,n),o:0}));
+    renderEdit();
+}
+function renderEdit(){
+    let n=state.truthN;
+    let h='<table><thead><tr>'+V.slice(0,n).map(x=>'<th>'+x+'</th>').join('')+'<th>F (Output)</th></tr></thead><tbody>';
+    state.rows.forEach(r=>{
+        h+='<tr>'+r.b.map(x=>'<td>'+x+'</td>').join('')+'<td><button class="btn '+(r.o===1?'primary':'')+'" onclick="cycle('+r.m+')">'+r.o+'</button></td></tr>';
+    });
+    $("editTruth").innerHTML=h+'</tbody></table>';
+}
+window.cycle=m=>{
+    let r=state.rows.find(x=>x.m===m);
+    r.o = r.o===0 ? 1 : r.o===1 ? "X" : 0;
+    renderEdit();
+    calculate();
+}
+
+function tokenize(s){
+    s = s.replace(/NAND/gi," nand ").replace(/NOR/gi," nor ").replace(/XOR/gi," xor ");
+    let a=[];
+    for(let i=0; i<s.length;){
+        let c=s[i];
+        if(/\s/.test(c)){ i++; continue; }
+        if(/[A-F]/i.test(c)){
+            let varName = c.toUpperCase();
+            i++;
+            while(i < s.length && s[i]==="'"){
+                a.push(["op","!"]);
+                i++;
+            }
+            a.push(["v",varName]);
+            continue;
+        }
+        if("()+.*&|!~^".includes(c)){
+            let op = c==="."||c==="*"||c==="&" ? "*" : c==="|" ? "+" : c==="~" ? "!" : c;
+            a.push([op==="("||op === ")" ? op : "op", op]);
+            i++;
+            continue;
+        }
+        let m=s.slice(i).match(/^(nand|nor|xor|xnor)/i);
+        if(m){ a.push(["op",m[1].toLowerCase()]); i+=m[1].length; continue; }
+        i++;
+    }
+    let expanded = [];
+    for(let i=0; i<a.length; i++){
+        expanded.push(a[i]);
+        if(i+1 < a.length){
+            let curr = a[i], next = a[i+1];
+            let currIsTerm = (curr[0]==="v" || curr[1]===")");
+            let nextIsTerm = (next[0]==="v" || next[1]==="(" || next[1]==="!");
+            if(currIsTerm && nextIsTerm){
+                expanded.push(["op","*"]);
+            }
+        }
+    }
+    return expanded;
+}
+
+function parse(s){
+    let t=tokenize(s),i=0;
+    function p(){
+        let x=t[i++];
+        if(!x)throw Error("Unexpected end");
+        if(x[0]==="v")return {k:"v",v:x[1]};
+        if(x[0]==="("){let n=o();if(!t[i]||t[i][0]!==")")throw Error("Missing )");i++;return n}
+        if(x[0]==="op"&&x[1]==="!")return{k:"not",a:p()};
+        throw Error("Expected variable");
+    }
+    function a(){
+        let n=p();
+        while(t[i]&&t[i][0]==="op"&&["*","nand"].includes(t[i][1])){
+            let z=t[i++][1],r=p();
+            n={k:z==="*"?"and":"nand",a:n,b:r};
+        }
+        return n;
+    }
+    function x(){
+        let n=a();
+        while(t[i]&&t[i][0]==="op"&&["^","xor","xnor"].includes(t[i][1])){
+            let z=t[i++][1],r=a();
+            n={k:z==="xnor"?"xnor":"xor",a:n,b:r};
+        }
+        return n;
+    }
+    function o(){
+        let n=x();
+        while(t[i]&&t[i][0]==="op"&&["+","nor"].includes(t[i][1])){
+            let z=t[i++][1],r=x();
+            n={k:z==="+"?"or":"nor",a:n,b:r};
+        }
+        return n;
+    }
+    let n=o();
+    if(i<t.length)throw Error("Unexpected token");
+    return n;
+}
+
+function ev(n,e){if(n.k==="v")return e[n.v];if(n.k==="not")return 1-ev(n.a,e);let a=ev(n.a,e),b=ev(n.b,e);return n.k==="and"?a&b:n.k==="or"?a|b:n.k==="xor"?a^b:n.k==="xnor"?1-(a^b):n.k==="nand"?1-(a&b):1-(a|b)}
+function varsOf(n,s=new Set()){if(n.k==="v")s.add(n.v);else{varsOf(n.a,s);if(n.b)varsOf(n.b,s)}return [...s].sort((a,b)=>V.indexOf(a)-V.indexOf(b))}
+
+function source(){
+    if(state.mode==="expression"){
+        let ast=parse($("expr").value),v=varsOf(ast);
+        return{v,rows:Array.from({length:1<<v.length},(_,m)=>{let b=bits(m,v.length),e={};v.forEach((x,i)=>e[x]=b[i]);return{m,b,o:ev(ast,e)}}),ast}
+    }
+    if(state.mode==="terms"){
+        let n=+$("termN").value,v=V.slice(0,n),a=parseList($("terms").value),dc=parseList($("dc").value);
+        return{v,rows:Array.from({length:1<<n},(_,m)=>({m,b:bits(m,n),o:state.max?(a.includes(m)?0:dc.includes(m)?"X":1):(a.includes(m)?1:dc.includes(m)?"X":0)}))}
+    }
+    return{v:V.slice(0,state.truthN),rows:state.rows}
+}
+
+function quineMcCluskey(v, rows, isSOP = true) {
+    let target = rows.filter(r => r.o === (isSOP ? 1 : 0)).map(r => r.m);
+    let dc = rows.filter(r => r.o === "X").map(r => r.m);
+    let n = v.length;
+    let allMinterms = [...target, ...dc];
+
+    if (target.length === 0) return isSOP ? "0" : "1";
+    if (target.length + dc.length === (1 << n)) return isSOP ? "1" : "0";
+
+    let currentImplicants = allMinterms.map(m => ({
+        minterms: [m],
+        mask: (1 << n) - 1,
+        val: m,
+        used: false
+    }));
+
+    let primeImplicants = [];
+    let stop = false;
+    while (!stop) {
+        let nextImplicantsMap = new Map();
+        let marked = new Array(currentImplicants.length).fill(false);
+
+        for (let i = 0; i < currentImplicants.length; i++) {
+            for (let j = i + 1; j < currentImplicants.length; j++) {
+                let p1 = currentImplicants[i];
+                let p2 = currentImplicants[j];
+
+                if (p1.mask === p2.mask) {
+                    let diff = p1.val ^ p2.val;
+                    if (diff > 0 && (diff & (diff - 1)) === 0) {
+                        marked[i] = true;
+                        marked[j] = true;
+                        let newMask = p1.mask ^ diff;
+                        let newVal = p1.val & newMask;
+                        let mergedMinterms = Array.from(new Set([...p1.minterms, ...p2.minterms])).sort((a,b)=>a-b);
+                        let key = `${newMask}:${newVal}`;
+                        if (!nextImplicantsMap.has(key)) {
+                            nextImplicantsMap.set(key, { minterms: mergedMinterms, mask: newMask, val: newVal, used: false });
+                        }
+                    }
+                }
+            }
+        }
+
+        for (let i = 0; i < currentImplicants.length; i++) {
+            if (!marked[i]) {
+                let pi = currentImplicants[i];
+                if (!primeImplicants.some(existing => existing.mask === pi.mask && existing.val === pi.val)) {
+                    primeImplicants.push(pi);
+                }
+            }
+        }
+
+        let nextImplicants = Array.from(nextImplicantsMap.values());
+        if (nextImplicants.length === 0) {
+            stop = true;
+        } else {
+            currentImplicants = nextImplicants;
+        }
+    }
+
+    let selectedPIs = [];
+    let remainingMinterms = new Set(target);
+    let validPIs = primeImplicants.map(pi => ({
+        ...pi,
+        coveredTarget: pi.minterms.filter(m => target.includes(m))
+    })).filter(pi => pi.coveredTarget.length > 0);
+
+    target.forEach(m => {
+        let coveringPIs = validPIs.filter(pi => pi.coveredTarget.includes(m));
+        if (coveringPIs.length === 1) {
+            let epi = coveringPIs[0];
+            if (!selectedPIs.includes(epi)) {
+                selectedPIs.push(epi);
+                epi.coveredTarget.forEach(tm => remainingMinterms.delete(tm));
+            }
+        }
+    });
+
+    while (remainingMinterms.size > 0) {
+        let bestPI = null;
+        let maxCoveredCount = -1;
+
+        validPIs.forEach(pi => {
+            if (selectedPIs.includes(pi)) return;
+            let count = pi.coveredTarget.filter(tm => remainingMinterms.has(tm)).length;
+            if (count > maxCoveredCount) {
+                maxCoveredCount = count;
+                bestPI = pi;
+            }
+        });
+
+        if (!bestPI || maxCoveredCount === 0) break;
+        selectedPIs.push(bestPI);
+        bestPI.coveredTarget.forEach(tm => remainingMinterms.delete(tm));
+    }
+
+    if (selectedPIs.length === 0) return isSOP ? "0" : "1";
+
+    return selectedPIs.map(pi => {
+        let z = [];
+        for (let i = 0; i < n; i++) {
+            let bitPos = 1 << (n - 1 - i);
+            if ((pi.mask & bitPos) !== 0) {
+                let bitVal = (pi.val & bitPos) !== 0 ? 1 : 0;
+                if (isSOP) {
+                    z.push(v[i] + (bitVal ? "" : "′"));
+                } else {
+                    z.push(v[i] + (bitVal ? "′" : ""));
+                }
+            }
+        }
+        if (isSOP) {
+            return z.join("·") || "1";
+        } else {
+            let termStr = z.join(" + ") || "0";
+            return z.length > 1 ? `(${termStr})` : termStr;
+        }
+    }).join(isSOP ? " + " : " · ");
+}
+
+function simplify(v, rows, ones=true){
+    return quineMcCluskey(v, rows, ones);
+}
+
+function calculate(){
+    try{
+        let d=source();
+        $("error").classList.remove("show");
+        $("booleanResult").classList.add("show");
+        let sop=simplify(d.v,d.rows,true),pos=simplify(d.v,d.rows,false);
+        $("sop").textContent=sop;$("pos").textContent=pos;
+
+        renderKmapTruth(d.v, d.rows);
+        renderKmap(d.v,d.rows);
+        renderGateEngine(sop, d.v);
+    }catch(e){
+        $("booleanResult").classList.remove("show");
+        $("error").textContent=e.message;
+        $("error").classList.add("show");
+    }
+}
+
+function renderKmapTruth(v, rows){
+    let h='<table><thead><tr>'+v.map(x=>'<th>'+x+'</th>').join('')+'<th>F (Output)</th></tr></thead><tbody>';
+    rows.forEach(r=>{
+        h+='<tr>'+r.b.map(x=>'<td>'+x+'</td>').join('')+'<td>'+r.o+'</td></tr>';
+    });
+    $("kmapTruth").innerHTML=h+'</tbody></table>';
+}
+
+function renderKmap(v,r){
+    if(v.length<2||v.length>6){$("kmap").innerHTML='<div style="padding:15px;color:#fbbf24">K-maps support 2–6 variables.</div>';return}
+    let rn=Math.floor(v.length/2),cn=v.length-rn,ro=gray(rn),co=gray(cn),mp=new Map(r.map(q=>[q.m,q.o]));
+    let h='<table><thead><tr><th>'+v.slice(0,rn).join(",")+' / '+v.slice(rn).join(",")+'</th>'+co.map(c=>'<th class="km">'+bits(c,cn).join("")+'</th>').join("")+'</th></tr></thead><tbody>';
+    ro.forEach(rr=>{
+        h+='<tr><th class="km">'+bits(rr,rn).join("")+'</th>';
+        co.forEach(cc=>{
+            let m=(rr<<cn)|cc,o=mp.get(m);
+            h+='<td class="'+(o===1?"k1":o==="X"?"kx":"")+'"><b>'+o+'</b><br><small>m'+m+'</small></td>';
+        });
+        h+='</tr>';
+    });
+    $("kmap").innerHTML=h+"</tbody></table>";
+}
+
+function hasOutputBubble(type) {
+  return type === "NOT" || type === "NAND" || type === "NOR" || type === "XNOR";
+}
+
+function shapePath(type, x, y, w, h) {
+  const top = y - h / 2;
+  const bottom = y + h / 2;
+
+  if (type === "NOT") {
+    return `M ${x} ${top} L ${x} ${bottom} L ${x + w} ${y} Z`;
+  }
+  if (type === "AND" || type === "NAND") {
+    const r = h / 2;
+    const bodyRight = x + w - r;
+    return `M ${x} ${top} H ${bodyRight} A ${r} ${r} 0 0 1 ${bodyRight} ${bottom} H ${x} Z`;
+  }
+  if (type === "OR" || type === "NOR") {
+    return [
+      `M ${x} ${top}`,
+      `Q ${x + w * 0.35} ${y}, ${x} ${bottom}`,
+      `Q ${x + w * 0.65} ${bottom}, ${x + w} ${y}`,
+      `Q ${x + w * 0.65} ${top}, ${x} ${top}`,
+      "Z"
+    ].join(" ");
+  }
+  if (type === "XOR" || type === "XNOR") {
+    return [
+      `M ${x + 10} ${top}`,
+      `Q ${x + 10 + w * 0.35} ${y}, ${x + 10} ${bottom}`,
+      `Q ${x + 10 + w * 0.65} ${bottom}, ${x + w} ${y}`,
+      `Q ${x + 10 + w * 0.65} ${top}, ${x + 10} ${top}`,
+      "Z",
+      `M ${x + 2} ${top}`,
+      `Q ${x + 2 + w * 0.35} ${y}, ${x + 2} ${bottom}`
+    ].join(" ");
+  }
+  return `M ${x} ${top} h ${w} v ${h} h -${w} Z`;
+}
+
+function sanitizeNetlistInputs(nodes) {
+  nodes.forEach(node => {
+    if ((node.type === "NAND" || node.type === "NOR") && node.inputs.length === 1) {
+      node.inputs = [node.inputs[0], node.inputs[0]];
+    }
+  });
+}
+
+function computeLayout(netlist) {
+  const nodeMap = new Map();
+  netlist.nodes.forEach((n) => nodeMap.set(n.id, n));
+  const depths = new Map();
+
+  function getDepth(id) {
+    if (depths.has(id)) return depths.get(id);
+    const node = nodeMap.get(id);
+    if (!node || node.inputs.length === 0) {
+      depths.set(id, 0);
+      return 0;
+    }
+    const maxDep = Math.max(...node.inputs.map((depId) => getDepth(depId)));
+    const d = maxDep + 1;
+    depths.set(id, d);
+    return d;
+  }
+
+  netlist.nodes.forEach((n) => getDepth(n.id));
+
+  const cols = [];
+  netlist.nodes.forEach((n) => {
+    const d = depths.get(n.id) || 0;
+    if (!cols[d]) cols[d] = [];
+    cols[d].push(n);
+  });
+
+  const layoutNodes = [];
+  const byId = new Map();
+  const colWidth = 100;
+  const startX = 45;
+  const rowHeight = 48;
+  const startY = 35;
+
+  cols.forEach((colNodes, colIndex) => {
+    const x = startX + colIndex * colWidth;
+    colNodes.forEach((node, rowIndex) => {
+      const y = startY + rowIndex * rowHeight;
+      const width = node.type === "INPUT" || node.type === "CONST" ? 16 : 40;
+      const height = node.type === "INPUT" || node.type === "CONST" ? 16 : 30;
+
+      const ln = { id: node.id, node, x, y, width, height, col: colIndex };
+      layoutNodes.push(ln);
+      byId.set(node.id, ln);
+    });
+  });
+
+  const maxCol = cols.length - 1;
+  const totalWidth = startX + (maxCol + 1) * colWidth + 50;
+  const maxRowLen = Math.max(...cols.map((c) => c.length));
+  const totalHeight = startY + maxRowLen * rowHeight + 35;
+
+  return { nodes: layoutNodes, byId, width: totalWidth, height: totalHeight };
+}
+
+function computeWireGeometry(layout, laneOffsetBase = -10) {
+  const wires = [];
+  const wireDs = [];
+  let maxLaneUsed = 0;
+
+  layout.nodes.forEach((targetLn) => {
+    targetLn.node.inputs.forEach((sourceId, pinIdx) => {
+      const sourceLn = layout.byId.get(sourceId);
+      if (!sourceLn) return;
+
+      wires.push({ key: `${sourceId}->${targetLn.id}:${pinIdx}`, fromId: sourceId, toId: targetLn.id });
+
+      const startX = sourceLn.x + sourceLn.width;
+      const startY = sourceLn.y;
+
+      const totalPins = targetLn.node.inputs.length;
+      const pinSpacing = targetLn.height / (totalPins + 1);
+      const targetX = targetLn.x;
+      const targetY = targetLn.y - targetLn.height / 2 + pinSpacing * (pinIdx + 1);
+
+      const midX = startX + (targetX - startX) / 2;
+
+      let needsDetour = false;
+      layout.nodes.forEach((other) => {
+        if (other.id === sourceLn.id || other.id === targetLn.id) return;
+        if (
+          other.y - other.height / 2 <= startY &&
+          other.y + other.height / 2 >= startY &&
+          other.x < Math.max(startX, targetX) &&
+          other.x + other.width > Math.min(startX, targetX)
+        ) {
+          needsDetour = true;
+        }
+      });
+
+      if (needsDetour) {
+        const laneY = laneOffsetBase - maxLaneUsed * 10;
+        maxLaneUsed++;
+        wireDs.push(`M ${startX} ${startY} V ${laneY} H ${targetX - 8} V ${targetY} H ${targetX}`);
+      } else {
+        wireDs.push(`M ${startX} ${startY} H ${midX} V ${targetY} H ${targetX}`);
+      }
+    });
+  });
+
+  return { wires, wireDs, requiredLaneSpan: maxLaneUsed * 10 + 14 };
+}
+
+function renderNetlistToSVG(netlist, defaultOutputLabel = "OUT") {
+  sanitizeNetlistInputs(netlist.nodes);
+  let layout = computeLayout(netlist);
+  const wireColor = "#7dd3fc";
+  const gateStroke = "#6ee7b7";
+  const gateFill = "rgba(15, 39, 23, 0.9)";
+  const stubLen = 20;
+
+  let outputs = netlist.outputs || [{ id: netlist.outputId, label: defaultOutputLabel }];
+  
+  let maxOutX = 0;
+  outputs.forEach(out => {
+    let ln = layout.byId.get(out.id);
+    if (ln) {
+      let outX = ln.x + ln.width + (hasOutputBubble(ln.node.type) ? BUBBLE_R * 2 : 0);
+      if (outX > maxOutX) maxOutX = outX;
+    }
+  });
+  const totalWidth = Math.max(layout.width, maxOutX + stubLen + 50);
+
+  const { wires, wireDs, requiredLaneSpan } = computeWireGeometry(layout, -10);
+  const ROUTE_LANE = Math.max(20, requiredLaneSpan);
+  const svgHeight = Math.max(170, layout.height + ROUTE_LANE + 20);
+
+  let svgContent = `<svg viewBox="0 ${-ROUTE_LANE} ${totalWidth} ${svgHeight}" width="100%">`;
+  
+  svgContent += `<g>`;
+  wireDs.forEach(d => {
+    svgContent += `<path d="${d}" stroke="${wireColor}" stroke-width="1.5" fill="none" stroke-linejoin="round" />`;
+  });
+  
+  outputs.forEach(out => {
+    let ln = layout.byId.get(out.id);
+    if (ln) {
+      let outX = ln.x + ln.width + (hasOutputBubble(ln.node.type) ? BUBBLE_R * 2 : 0);
+      svgContent += `<path d="M ${outX} ${ln.y} H ${outX + stubLen}" stroke="${wireColor}" stroke-width="1.5" />`;
+    }
+  });
+  svgContent += `</g>`;
+
+  svgContent += `<g>`;
+  layout.nodes.forEach((ln) => {
+    const { node, x, y, width, height } = ln;
+
+    if (node.type === "INPUT") {
+      svgContent += `
+        <g>
+          <circle cx="${x}" cy="${y}" r="3" fill="${wireColor}" />
+          <text x="${x - 8}" y="${y + 4}" text-anchor="end" font-size="12" font-weight="700" fill="#a7f3d0">${node.name}</text>
+        </g>`;
+    } else if (node.type === "CONST") {
+      svgContent += `
+        <g>
+          <rect x="${x}" y="${y - height/2}" width="${width}" height="${height}" rx="4" fill="${gateFill}" stroke="${gateStroke}" stroke-width="1.2" />
+          <text x="${x + width/2}" y="${y + 4}" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">${node.value}</text>
+        </g>`;
+    } else {
+      const bubble = hasOutputBubble(node.type);
+      const pathData = shapePath(node.type, x, y, width, height);
+      const bubbleCx = x + width + BUBBLE_R;
+
+      svgContent += `
+        <g>
+          <path d="${pathData}" fill="${gateFill}" stroke="${gateStroke}" stroke-width="1.5" />
+          ${bubble ? `<circle cx="${bubbleCx}" cy="${y}" r="${BUBBLE_R}" fill="${gateFill}" stroke="${gateStroke}" stroke-width="1.2" />` : ""}
+        </g>`;
+    }
+  });
+  svgContent += `</g>`;
+
+  svgContent += `<g>`;
+  outputs.forEach(out => {
+    let ln = layout.byId.get(out.id);
+    if (ln) {
+      let outX = ln.x + ln.width + (hasOutputBubble(ln.node.type) ? BUBBLE_R * 2 : 0);
+      svgContent += `<text x="${outX + stubLen + 8}" y="${ln.y + 4}" font-size="12" font-weight="700" fill="#ffffff">${out.label}</text>`;
+    }
+  });
+  svgContent += `</g></svg>`;
+
+  return svgContent;
+}
+
+function buildNetlistFromSop(sop, variables, gateType = "basic") {
+  let nodes = [];
+  let idCounter = 0;
+  function nextId(prefix) { return `${prefix}_${idCounter++}`; }
+
+  let varInputMap = new Map();
+  variables.forEach(v => {
+    let id = nextId("in");
+    nodes.push({ id, type: "INPUT", name: v, inputs: [] });
+    varInputMap.set(v, id);
+  });
+
+  let nandNotCache = new Map();
+  function getNandNot(inputId) {
+    if (nandNotCache.has(inputId)) return nandNotCache.get(inputId);
+    let id = nextId("nand_not");
+    nodes.push({ id, type: "NAND", inputs: [inputId, inputId] });
+    nandNotCache.set(inputId, id);
+    return id;
+  }
+
+  let norNotCache = new Map();
+  function getNorNot(inputId) {
+    if (norNotCache.has(inputId)) return norNotCache.get(inputId);
+    let id = nextId("nor_not");
+    nodes.push({ id, type: "NOR", inputs: [inputId, inputId] });
+    norNotCache.set(inputId, id);
+    return id;
+  }
+
+  let terms = sop.split("+").map(t => t.trim()).filter(Boolean);
+  if (terms.length === 0 || sop === "0") {
+    let constId = nextId("const");
+    nodes.push({ id: constId, type: "CONST", value: 0, inputs: [] });
+    if (gateType === "nand") {
+      let n1 = nextId("nand");
+      let n2 = nextId("nand");
+      nodes.push({ id: n1, type: "NAND", inputs: [constId, constId] });
+      nodes.push({ id: n2, type: "NAND", inputs: [n1, n1] });
+      return { nodes, outputId: n2 };
+    }
+    if (gateType === "nor") {
+      let n1 = nextId("nor");
+      nodes.push({ id: n1, type: "NOR", inputs: [constId, constId] });
+      return { nodes, outputId: n1 };
+    }
+    return { nodes, outputId: constId };
+  }
+  if (sop === "1") {
+    let constId = nextId("const");
+    nodes.push({ id: constId, type: "CONST", value: 1, inputs: [] });
+    if (gateType === "nand") {
+      let n1 = nextId("nand");
+      nodes.push({ id: n1, type: "NAND", inputs: [constId, constId] });
+      return { nodes, outputId: n1 };
+    }
+    if (gateType === "nor") {
+      let n1 = nextId("nor");
+      let n2 = nextId("nor");
+      nodes.push({ id: n1, type: "NOR", inputs: [constId, constId] });
+      nodes.push({ id: n2, type: "NOR", inputs: [n1, n1] });
+      return { nodes, outputId: n2 };
+    }
+    return { nodes, outputId: constId };
+  }
+
+  if (gateType === "nand") {
+    let termNandIds = [];
+    terms.forEach(termStr => {
+      let literals = termStr.split("·").map(l => l.trim()).filter(Boolean);
+      let litNodeIds = literals.map(lit => {
+        let isPrime = lit.includes("′") || lit.includes("'");
+        let vName = lit.replace(/[′']/g, "");
+        let baseIn = varInputMap.get(vName);
+        return isPrime ? getNandNot(baseIn) : baseIn;
+      });
+      if (litNodeIds.length === 0) return;
+      let termNand = nextId("nand_term");
+      nodes.push({ id: termNand, type: "NAND", inputs: litNodeIds });
+      termNandIds.push(termNand);
+    });
+
+    if (termNandIds.length === 1) {
+      let finalNand = nextId("nand_out");
+      nodes.push({ id: finalNand, type: "NAND", inputs: [termNandIds[0], termNandIds[0]] });
+      return { nodes, outputId: finalNand };
+    }
+
+    let finalNand = nextId("nand_final");
+    nodes.push({ id: finalNand, type: "NAND", inputs: termNandIds });
+    return { nodes, outputId: finalNand };
+
+  } else if (gateType === "nor") {
+    let termNorIds = [];
+    terms.forEach(termStr => {
+      let literals = termStr.split("·").map(l => l.trim()).filter(Boolean);
+      let invertedLitIds = literals.map(lit => {
+        let isPrime = lit.includes("′") || lit.includes("'");
+        let vName = lit.replace(/[′']/g, "");
+        let baseIn = varInputMap.get(vName);
+        return isPrime ? baseIn : getNorNot(baseIn);
+      });
+      let termNor = nextId("nor_term");
+      nodes.push({ id: termNor, type: "NOR", inputs: invertedLitIds });
+      termNorIds.push(termNor);
+    });
+
+    if (termNorIds.length === 1) {
+      return { nodes, outputId: termNorIds[0] };
+    }
+
+    let finalInverted = termNorIds.map(tId => getNorNot(tId));
+    let finalNor = nextId("nor_final");
+    nodes.push({ id: finalNor, type: "NOR", inputs: finalInverted });
+    return { nodes, outputId: finalNor };
+
+  } else {
+    let notCache = new Map();
+    function getNot(vName) {
+      if (notCache.has(vName)) return notCache.get(vName);
+      let inId = varInputMap.get(vName);
+      let id = nextId("not");
+      nodes.push({ id, type: "NOT", inputs: [inId] });
+      notCache.set(vName, id);
+      return id;
+    }
+
+    let termGateIds = [];
+    terms.forEach(termStr => {
+      let literals = termStr.split("·").map(l => l.trim()).filter(Boolean);
+      let litNodeIds = literals.map(lit => {
+        let isPrime = lit.includes("′") || lit.includes("'");
+        let vName = lit.replace(/[′']/g, "");
+        return isPrime ? getNot(vName) : varInputMap.get(vName);
+      });
+      let andId = nextId("and");
+      nodes.push({ id: andId, type: "AND", inputs: litNodeIds });
+      termGateIds.push(andId);
+    });
+
+    if (termGateIds.length === 1) {
+      return { nodes, outputId: termGateIds[0] };
+    }
+
+    let orId = nextId("or");
+    nodes.push({ id: orId, type: "OR", inputs: termGateIds });
+    return { nodes, outputId: orId };
+  }
+}
+
+function renderGateEngine(sop, variables) {
+  let netlist = buildNetlistFromSop(sop, variables, state.gate);
+  $("gateDiagram").innerHTML = renderNetlistToSVG(netlist, "OUT");
+}
+
+function downloadGatePng() {
+  const svgElement = document.querySelector("#gateDiagram svg");
+  if (!svgElement) return;
+  
+  const svgString = new XMLSerializer().serializeToString(svgElement);
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const URL = window.URL || window.webkitURL || window;
+  const blobURL = URL.createObjectURL(svgBlob);
+  
+  const image = new Image();
+  image.onload = () => {
+    const canvas = document.createElement("canvas");
+    const scale = 2;
+    canvas.width = (svgElement.clientWidth || 800) * scale;
+    canvas.height = (svgElement.clientHeight || 300) * scale;
+    const context = canvas.getContext("2d");
+    context.fillStyle = "#020a05";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.scale(scale, scale);
+    context.drawImage(image, 0, 0);
+    
+    const pngData = canvas.toDataURL("image/png");
+    const downloadLink = document.createElement("a");
+    downloadLink.href = pngData;
+    downloadLink.download = `logic-circuit-${state.gate}.png`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    URL.revokeObjectURL(blobURL);
+  };
+  image.src = blobURL;
+}
+
+window.setAdderMode = function(mode) {
+  state.adderMode = mode;
+  document.querySelectorAll("#adderModeTabs button").forEach(b => {
+    b.classList.toggle("primary", b.dataset.addermode === mode);
+  });
+  renderAdder();
+}
+
+function renderAdder() {
+  const isFA = state.adderMode === "fa";
+  let html = `<div class="truth-controls">`;
+  html += `<span class="signal"><strong>A:</strong> <button class="btn" onclick="toggleAdderInput('A')">${state.adderInputs.A}</button></span>`;
+  html += `<span class="signal"><strong>B:</strong> <button class="btn" onclick="toggleAdderInput('B')">${state.adderInputs.B}</button></span>`;
+  if (isFA) {
+    html += `<span class="signal"><strong>Cin:</strong> <button class="btn" onclick="toggleAdderInput('Cin')">${state.adderInputs.Cin}</button></span>`;
+  }
+  html += `</div>`;
+  $("adderControls").innerHTML = html;
+
+  let A = state.adderInputs.A;
+  let B = state.adderInputs.B;
+  let Cin = isFA ? state.adderInputs.Cin : 0;
+
+  let sum = A ^ B ^ Cin;
+  let cout = (A & B) | (Cin & (A ^ B));
+
+  $("adderResult").innerHTML = `<div class="answer-grid">
+    <div class="answer"><span>Sum (S)</span><b>${sum}</b></div>
+    <div class="answer"><span>Carry Out (${isFA ? 'Cout' : 'C'})</span><b>${cout}</b></div>
+  </div>`;
+
+  let netlist = !isFA ? {
+    nodes: [
+      { id: "inA", type: "INPUT", name: "A", inputs: [] },
+      { id: "inB", type: "INPUT", name: "B", inputs: [] },
+      { id: "xor1", type: "XOR", inputs: ["inA", "inB"] },
+      { id: "and1", type: "AND", inputs: ["inA", "inB"] }
+    ],
+    outputs: [
+      { id: "xor1", label: "Sum" },
+      { id: "and1", label: "Cout" }
+    ]
+  } : {
+    nodes: [
+      { id: "inA", type: "INPUT", name: "A", inputs: [] },
+      { id: "inB", type: "INPUT", name: "B", inputs: [] },
+      { id: "inCin", type: "INPUT", name: "Cin", inputs: [] },
+      { id: "xor1", type: "XOR", inputs: ["inA", "inB"] },
+      { id: "xor2", type: "XOR", inputs: ["xor1", "inCin"] },
+      { id: "and1", type: "AND", inputs: ["inA", "inB"] },
+      { id: "and2", type: "AND", inputs: ["xor1", "inCin"] },
+      { id: "or1", type: "OR", inputs: ["and1", "and2"] }
+    ],
+    outputs: [
+      { id: "xor2", label: "Sum" },
+      { id: "or1", label: "Cout" }
+    ]
+  };
+  $("adderSvg").innerHTML = renderNetlistToSVG(netlist);
+}
+
+window.toggleAdderInput = function(name) {
+  state.adderInputs[name] = 1 - state.adderInputs[name];
+  renderAdder();
+}
+
+window.setSubtracterMode = function(mode) {
+  state.subMode = mode;
+  document.querySelectorAll("#subtracterModeTabs button").forEach(b => {
+    b.classList.toggle("primary", b.dataset.submode === mode);
+  });
+  renderSubtracter();
+}
+
+function renderSubtracter() {
+  const isFS = state.subMode === "fs";
+  let html = `<div class="truth-controls">`;
+  html += `<span class="signal"><strong>A:</strong> <button class="btn" onclick="toggleSubInput('A')">${state.subInputs.A}</button></span>`;
+  html += `<span class="signal"><strong>B:</strong> <button class="btn" onclick="toggleSubInput('B')">${state.subInputs.B}</button></span>`;
+  if (isFS) {
+    html += `<span class="signal"><strong>Bin:</strong> <button class="btn" onclick="toggleSubInput('Bin')">${state.subInputs.Bin}</button></span>`;
+  }
+  html += `</div>`;
+  $("subtracterControls").innerHTML = html;
+
+  let A = state.subInputs.A;
+  let B = state.subInputs.B;
+  let Bin = isFS ? state.subInputs.Bin : 0;
+
+  let diff = A ^ B ^ Bin;
+  let bout = ((!A) & B) | ((!A ^ B) & Bin);
+
+  $("subtracterResult").innerHTML = `<div class="answer-grid">
+    <div class="answer"><span>Difference (D)</span><b>${diff}</b></div>
+    <div class="answer"><span>Borrow Out (${isFS ? 'Bout' : 'B'})</span><b>${bout}</b></div>
+  </div>`;
+
+  let netlist = !isFS ? {
+    nodes: [
+      { id: "inA", type: "INPUT", name: "A", inputs: [] },
+      { id: "inB", type: "INPUT", name: "B", inputs: [] },
+      { id: "notA", type: "NOT", inputs: ["inA"] },
+      { id: "xor1", type: "XOR", inputs: ["inA", "inB"] },
+      { id: "and1", type: "AND", inputs: ["notA", "inB"] }
+    ],
+    outputs: [
+      { id: "xor1", label: "Diff" },
+      { id: "and1", label: "Bout" }
+    ]
+  } : {
+    nodes: [
+      { id: "inA", type: "INPUT", name: "A", inputs: [] },
+      { id: "inB", type: "INPUT", name: "B", inputs: [] },
+      { id: "inBin", type: "INPUT", name: "Bin", inputs: [] },
+      { id: "notA", type: "NOT", inputs: ["inA"] },
+      { id: "xor1", type: "XOR", inputs: ["inA", "inB"] },
+      { id: "xor2", type: "XOR", inputs: ["xor1", "inBin"] },
+      { id: "and1", type: "AND", inputs: ["notA", "inB"] },
+      { id: "notXor1", type: "NOT", inputs: ["xor1"] },
+      { id: "and2", type: "AND", inputs: ["notXor1", "inBin"] },
+      { id: "or1", type: "OR", inputs: ["and1", "and2"] }
+    ],
+    outputs: [
+      { id: "xor2", label: "Diff" },
+      { id: "or1", label: "Bout" }
+    ]
+  };
+  $("subtracterSvg").innerHTML = renderNetlistToSVG(netlist);
+}
+
+window.toggleSubInput = function(name) {
+  state.subInputs[name] = 1 - state.subInputs[name];
+  renderSubtracter();
+}
+
+function renderMux() {
+  let size = state.mux;
+  let html = `<div class="truth-controls">`;
+  for(let i=0; i<size; i++){
+    html += `<span class="signal"><strong>D${i}:</strong> <button class="btn" onclick="toggleMuxData(${i})">${state.muxData[i]}</button></span>`;
+  }
+  html += `</div><div class="truth-controls" style="margin-top:8px">`;
+  if(size === 2) {
+    html += `<span class="signal"><strong>S0:</strong> <button class="btn" onclick="toggleMuxSel(0)">${state.muxSel}</button></span>`;
+  } else {
+    html += `<span class="signal"><strong>S1:</strong> <button class="btn" onclick="toggleMuxSel(1)">${(state.muxSel >> 1) & 1}</button></span>`;
+    html += `<span class="signal"><strong>S0:</strong> <button class="btn" onclick="toggleMuxSel(0)">${state.muxSel & 1}</button></span>`;
+  }
+  html += `</div>`;
+  $("muxControls").innerHTML = html;
+
+  let outVal = state.muxData[state.muxSel];
+  let existingAns = $("muxControls").nextElementSibling;
+  if(existingAns && existingAns.classList.contains("answer")) {
+    existingAns.innerHTML = `<span>Output (Y)</span><b>${outVal}</b>`;
+  } else {
+    let div = document.createElement("div");
+    div.className = "answer";
+    div.style.marginTop = "10px";
+    div.innerHTML = `<span>Output (Y)</span><b>${outVal}</b>`;
+    $("muxControls").after(div);
+  }
+
+  let netlist = size === 2 ? {
+    nodes: [
+      { id: "inD0", type: "INPUT", name: "D0", inputs: [] },
+      { id: "inD1", type: "INPUT", name: "D1", inputs: [] },
+      { id: "inS0", type: "INPUT", name: "S0", inputs: [] },
+      { id: "notS0", type: "NOT", inputs: ["inS0"] },
+      { id: "and0", type: "AND", inputs: ["inD0", "notS0"] },
+      { id: "and1", type: "AND", inputs: ["inD1", "inS0"] },
+      { id: "or1", type: "OR", inputs: ["and0", "and1"] }
+    ],
+    outputs: [{ id: "or1", label: "Y" }]
+  } : {
+    nodes: [
+      { id: "inD0", type: "INPUT", name: "D0", inputs: [] },
+      { id: "inD1", type: "INPUT", name: "D1", inputs: [] },
+      { id: "inD2", type: "INPUT", name: "D2", inputs: [] },
+      { id: "inD3", type: "INPUT", name: "D3", inputs: [] },
+      { id: "inS0", type: "INPUT", name: "S0", inputs: [] },
+      { id: "inS1", type: "INPUT", name: "S1", inputs: [] },
+      { id: "notS0", type: "NOT", inputs: ["inS0"] },
+      { id: "notS1", type: "NOT", inputs: ["inS1"] },
+      { id: "and0", type: "AND", inputs: ["inD0", "notS1", "notS0"] },
+      { id: "and1", type: "AND", inputs: ["inD1", "notS1", "inS0"] },
+      { id: "and2", type: "AND", inputs: ["inD2", "inS1", "notS0"] },
+      { id: "and3", type: "AND", inputs: ["inD3", "inS1", "inS0"] },
+      { id: "or1", type: "OR", inputs: ["and0", "and1", "and2", "and3"] }
+    ],
+    outputs: [{ id: "or1", label: "Y" }]
+  };
+  $("muxDiagram").innerHTML = renderNetlistToSVG(netlist, "Y");
+}
+
+window.toggleMuxData = function(idx) {
+  state.muxData[idx] = 1 - state.muxData[idx];
+  renderMux();
+}
+
+window.toggleMuxSel = function(bitIdx) {
+  state.muxSel ^= (1 << bitIdx);
+  renderMux();
+}
+
+document.querySelectorAll(".muxSize").forEach(btn => {
+  btn.addEventListener("click", e => {
+    document.querySelectorAll(".muxSize").forEach(b => b.classList.remove("primary"));
+    e.currentTarget.classList.add("primary");
+    let size = +e.currentTarget.dataset.size;
+    state.mux = size;
+    state.muxData = Array(size).fill(0);
+    state.muxSel = 0;
+    renderMux();
+  });
+});
+
+document.querySelectorAll(".nav button").forEach(btn => {
+  btn.addEventListener("click", e => {
+    document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+    e.currentTarget.classList.add("active");
+    let target = $(e.currentTarget.dataset.scroll);
+    if(target) target.scrollIntoView({behavior:"smooth"});
+  });
+});
+
+document.querySelectorAll(".tabs .tab").forEach(tab => {
+  tab.addEventListener("click", e => {
+    document.querySelectorAll(".tabs .tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".mode").forEach(m => m.classList.remove("active"));
+    e.currentTarget.classList.add("active");
+    state.mode = e.currentTarget.dataset.mode;
+    $(`mode-${state.mode}`).classList.add("active");
+    calculate();
+  });
+});
+
+document.querySelectorAll("#gateTabs button[data-gateview]").forEach(btn => {
+  btn.addEventListener("click", e => {
+    document.querySelectorAll("#gateTabs button[data-gateview]").forEach(b => b.classList.remove("primary"));
+    e.currentTarget.classList.add("primary");
+    state.gate = e.currentTarget.dataset.gateview;
+    calculate();
+  });
+});
+
+$("downloadPngBtn").addEventListener("click", downloadGatePng);
+
+$("sumBtn").addEventListener("click", () => {
+  state.max = false;
+  $("sumBtn").classList.add("primary");
+  $("prodBtn").classList.remove("primary");
+  calculate();
+});
+
+$("prodBtn").addEventListener("click", () => {
+  state.max = true;
+  $("prodBtn").classList.add("primary");
+  $("sumBtn").classList.remove("primary");
+  calculate();
+});
+
+$("termN").addEventListener("change", e => initRows(+e.target.value));
+$("truthN").addEventListener("change", e => initRows(+e.target.value));
+$("resetTruth").addEventListener("click", () => initRows(state.truthN));
+
+["expr", "terms", "dc"].forEach(id => {
+  $(id).addEventListener("input", calculate);
+});
+
+initRows(3);
+calculate();
+renderAdder();
+renderSubtracter();
+renderMux();
+</script>
+</body>
+</html>
